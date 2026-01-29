@@ -103,23 +103,43 @@ export function getPackMembers(packName: string): string[] {
 
 /**
  * Intended for running tests in container with results shown
- * in HTML page
+ * in HTML page. Returns the Mocha runner; listen for the 'end' event
+ * or use the optional onComplete callback to know when tests have completed.
  */
-export const executeTestsInBrowser = async (pack: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const executeTestsInBrowser = async (
+  pack: string,
+  onComplete: (stats: { passed: number; failed: number }) => void
+) => {
   (mocha as any).timeout(constants.TestTimeout);
   const suite = allTests[pack];
+
   for (let index = 0; index < suite.length; index++) {
     await suite[index]();
   }
-  mocha.run();
+
+  const runner = mocha.run() as unknown as Mocha.Runner;
+  if (onComplete) {
+    runner.once('end', () => {
+      const stats = (runner as any).stats;
+      onComplete({
+        failures: stats?.failures ?? 0,
+        passes: stats?.passes ?? 0,
+        duration: stats?.duration,
+      });
+    });
+  }
+  return runner;
 };
 
 /**
  * Intended for running Manual tests in container with results shown
- * in HTML page
+ * in HTML page. Returns the Mocha runner; listen for the 'end' event
+ * or use the optional onComplete callback to know when tests have completed.
  */
-export const executeManualTestsInBrowser = async (pack: string) => {
+export const executeManualTestsInBrowser = async (
+  pack: string,
+  onComplete?: (runner: { failures: number; passes: number; duration?: number }) => void
+) => {
   console.log('Pack', pack);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (mocha as any).timeout(constants.TestTimeout);
@@ -128,5 +148,16 @@ export const executeManualTestsInBrowser = async (pack: string) => {
   for (let index = 0; index < suite.length; index++) {
     await suite[index]();
   }
-  mocha.run();
+  const runner = mocha.run() as unknown as Mocha.Runner;
+  if (onComplete) {
+    runner.once('end', () => {
+      const stats = (runner as any).stats;
+      onComplete({
+        failures: stats?.failures ?? 0,
+        passes: stats?.passes ?? 0,
+        duration: stats?.duration,
+      });
+    });
+  }
+  return runner;
 };
