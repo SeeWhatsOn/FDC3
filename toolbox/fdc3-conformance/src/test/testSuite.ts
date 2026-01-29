@@ -99,24 +99,54 @@ export function getPackMembers(packName: string): string[] {
 
 /**
  * Intended for running tests in container with results shown
- * in HTML page
+ * in HTML page. Returns the Mocha runner; listen for the 'end' event
+ * or use the optional onComplete callback to know when tests have completed.
  */
-export const executeTestsInBrowser = (pack: string) => {
+export const executeTestsInBrowser = (
+  pack: string,
+  onComplete?: (runner: { failures: number; passes: number; duration?: number }) => void
+) => {
   (mocha as any).timeout(constants.TestTimeout);
   const suite = allTests[pack];
   suite.forEach(s => s());
-  mocha.run();
+  const runner = mocha.run() as unknown as Mocha.Runner;
+  if (onComplete) {
+    runner.once('end', () => {
+      const stats = (runner as any).stats;
+      onComplete({
+        failures: stats?.failures ?? 0,
+        passes: stats?.passes ?? 0,
+        duration: stats?.duration,
+      });
+    });
+  }
+  return runner;
 };
 
 /**
  * Intended for running Manual tests in container with results shown
- * in HTML page
+ * in HTML page. Returns the Mocha runner; listen for the 'end' event
+ * or use the optional onComplete callback to know when tests have completed.
  */
-export const executeManualTestsInBrowser = (pack: string) => {
+export const executeManualTestsInBrowser = (
+  pack: string,
+  onComplete?: (runner: { failures: number; passes: number; duration?: number }) => void
+) => {
   console.log('Pack', pack);
   (mocha as any).timeout(constants.TestTimeout);
   const suite = allManualTests[pack];
   console.log('************ found suite******', suite);
   suite.forEach(s => s());
-  mocha.run();
+  const runner = mocha.run() as unknown as Mocha.Runner;
+  if (onComplete) {
+    runner.once('end', () => {
+      const stats = (runner as any).stats;
+      onComplete({
+        failures: stats?.failures ?? 0,
+        passes: stats?.passes ?? 0,
+        duration: stats?.duration,
+      });
+    });
+  }
+  return runner;
 };

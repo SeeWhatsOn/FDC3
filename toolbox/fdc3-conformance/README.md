@@ -88,6 +88,25 @@ Successful runs look something like this:
 
 <img src="static/running.png" alt="Success" width="400px" />
 
+### Knowing when tests complete
+
+When the test run finishes, the page dispatches a custom event so you can react programmatically (e.g. from a parent window or automation):
+
+- **Event name:** `fdc3-conformance-tests-complete`
+- **Listen on:** `document` or `window`
+- **Detail:** `{ passes, failures, duration?, manual? }`
+
+Example (same page):
+
+```js
+document.addEventListener('fdc3-conformance-tests-complete', (e) => {
+  const { passes, failures, duration, manual } = e.detail;
+  console.log('Tests complete:', passes, 'passed', failures, 'failed', duration, 'ms');
+});
+```
+
+If the conformance app runs in an iframe, the parent can listen for the event on the iframe’s `contentWindow` (the event bubbles).
+
 ### Joining The Conformance Program
 
 If you've had a clean run of all the tests locally, why not join the conformance program?
