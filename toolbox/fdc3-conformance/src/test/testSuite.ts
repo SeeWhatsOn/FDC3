@@ -108,7 +108,7 @@ export function getPackMembers(packName: string): string[] {
  */
 export const executeTestsInBrowser = async (
   pack: string,
-  onComplete: (stats: { passed: number; failed: number }) => void
+  onComplete?: (stats: { passes: number; failures: number; duration?: number }) => void
 ) => {
   (mocha as any).timeout(constants.TestTimeout);
   const suite = allTests[pack];

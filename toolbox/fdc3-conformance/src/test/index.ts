@@ -70,8 +70,6 @@ function executeTests() {
   startProgressCapInterval();
   const fdc3Versions = document.getElementById('version') as HTMLSelectElement;
   const selectedVersion = fdc3Versions.options[fdc3Versions.selectedIndex].innerHTML;
-  const action = () => executeTestsInBrowser(selectedVersion);
-  var selectedVersion = fdc3Versions.options[fdc3Versions.selectedIndex].innerHTML;
   const action = () =>
     executeTestsInBrowser(selectedVersion, stats => notifyTestsComplete({ ...stats, manual: false }));
   if (window.fdc3) {
